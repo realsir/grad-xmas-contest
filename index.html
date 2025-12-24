@@ -168,50 +168,51 @@
 
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
       margin-top: 8px;
+      padding: 20px 0;
     }
 
     .gallery-item {
-      background: var(--accent-soft-2);
-      border-radius: 12px;
-      padding: 10px;
-      border: 2px solid var(--card-border);
+      width: 280px;
+      height: 280px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(34, 197, 94, 0.18), 0 2px 12px rgba(34, 197, 94, 0.12);
+      overflow: hidden;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      box-shadow: 0 0 0 2px #bbf7d055;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      transition: all 0.3s cubic-bezier(.68,-.55,.27,1.55);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 48px rgba(34, 197, 94, 0.25);
     }
 
     .gallery-thumb {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 3px solid #065f46;
-      box-shadow: 0 0 0 3px #bbf7d0;
-      background: #e5e7eb;
+      display: flex;
+      width: 92%;
+      height: 92%;
+      align-items: center;
+      justify-content: center;
     }
 
     .gallery-thumb img {
       width: 100%;
       height: 100%;
-      display: block;
       object-fit: cover;
+      border-radius: 16px;
       image-rendering: pixelated;
-      transition: transform 0.15s ease-out;
+      transition: filter 0.2s;
     }
 
     .gallery-item:hover .gallery-thumb img {
-      transform: scale(1.03);
-    }
-
-    .gallery-caption {
-      font-size: 12px;
-      color: #14532d;
-      text-align: left;
+      filter: brightness(0.92) saturate(1.2);
+      transform: scale(1.02);
     }
 
     .center-row {
@@ -251,12 +252,6 @@
       aspect-ratio: 4 / 3;
       border-radius: 10px;
       overflow: hidden;
-      border: 3px solid #065f46;
-      box-shadow: 0 0 0 3px #bbf7d0;
-      background: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .contest-thumb img {
@@ -265,6 +260,8 @@
       display: block;
       object-fit: contain;
       image-rendering: pixelated;
+      border: 3px solid #065f46;
+      border-radius: 10px;
     }
 
     .contest-label {
@@ -300,6 +297,7 @@
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
+      border: 3px solid #065f46;
     }
 
     .winner-title {
@@ -366,6 +364,14 @@
         max-width: min(400px, 95vw);
         padding: 12px;
       }
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+      }
+      .gallery-item {
+        width: 240px;
+        height: 240px;
+      }
     }
   </style>
 </head>
@@ -396,7 +402,7 @@
     window.addEventListener("resize", fillMatrixBackground);
     fillMatrixBackground();
 
-    const IMAGE_COUNT = 44;
+    const IMAGE_COUNT = 60;
     const images = Array.from({ length: IMAGE_COUNT }, (_, i) => ({
       id: i + 1,
       src: `${i + 1}.png`
@@ -453,13 +459,10 @@
       const itemsHtml = images
         .map(
           (img) => `
-          <div class="gallery-item"
-               data-action="open-full"
-               data-src="${img.src}">
+          <div class="gallery-item" data-action="open-full" data-src="${img.src}">
             <div class="gallery-thumb">
-              <img src="${img.src}" alt="#${img.id}" loading="lazy">
+              <img src="${img.src}" alt="" loading="lazy">
             </div>
-            <div class="gallery-caption">#${img.id}</div>
           </div>
         `
         )
@@ -555,8 +558,8 @@
 
             <div class="winner-photo">
               <div class="winner-title">🏆 CHAMPION 🏆</div>
-              <img class="winner-image" src="${winnerSrc}" alt="Winner #${winnerId}">
-              <div class="winner-note">#${winnerId}</div>
+              <img class="winner-image" src="${winnerSrc}" alt="Winner">
+              <div class="winner-note">Legendary artwork</div>
             </div>
 
             <div class="btn-row" style="margin-top:32px;">
@@ -570,10 +573,10 @@
 
       const [aId, bId] = st.currentPair || [];
       const totalMatchesPlayed = st.winners.length;
-      const estimatedTotalMatches = Math.ceil(Math.log2(IMAGE_COUNT)) * 2;
+      const totalMatchesNeeded = IMAGE_COUNT - 1;
       const progressPercent = Math.min(
         100,
-        Math.round((totalMatchesPlayed / estimatedTotalMatches) * 100)
+        Math.round((totalMatchesPlayed / totalMatchesNeeded) * 100)
       );
 
       app.innerHTML = `
@@ -585,27 +588,28 @@
             </div>
             <div class="top-right">
               Round: <strong>${st.round}</strong><br>
-              Progress: ${progressPercent}%
+              Progress: <strong>${progressPercent}%</strong>
             </div>
           </div>
 
           <p class="contest-progress">
             Click the artwork that feels more unique, magical, and unforgettable.
+            (${totalMatchesPlayed}/${totalMatchesNeeded} матчей)
           </p>
 
           <div class="contest-images">
             <div class="contest-card" data-action="choose" data-id="${aId}">
               <div class="contest-thumb">
-                <img src="${aId}.png" alt="#${aId}">
+                <img src="${aId}.png" alt="">
               </div>
-              <div class="contest-label">Option A · #${aId}</div>
+              <div class="contest-label">Option A</div>
             </div>
 
             <div class="contest-card" data-action="choose" data-id="${bId}">
               <div class="contest-thumb">
-                <img src="${bId}.png" alt="#${bId}">
+                <img src="${bId}.png" alt="">
               </div>
-              <div class="contest-label">Option B · #${bId}</div>
+              <div class="contest-label">Option B</div>
             </div>
           </div>
 
@@ -642,4 +646,3 @@
   </script>
 </body>
 </html>
-
